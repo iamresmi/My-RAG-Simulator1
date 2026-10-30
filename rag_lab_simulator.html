@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAG Lab — Interactive Simulator</title>
+<style>
+:root{--bg:#f4f6fb;--panel:#fff;--ink:#172033;--muted:#657089;--line:#e1e6f0;--blue:#3559e0;--blue2:#edf1ff;--green:#18794e;--greenbg:#e9f8f0;--amber:#9a5b00;--amberbg:#fff4dc;--red:#b42318;--redbg:#fff0ee;--shadow:0 10px 30px #1d2a4510}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:linear-gradient(120deg,#14234b,#344fc2);color:#fff;padding:28px max(22px,calc((100% - 1180px)/2)) 26px}
+header .eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.16em;opacity:.8;font-weight:700}h1{font-size:clamp(28px,4vw,42px);line-height:1.1;margin:8px 0}header p{max-width:760px;color:#e1e7ff;margin:10px 0 0}
+main{max-width:1180px;margin:24px auto;padding:0 18px 50px}.progress{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:20px}.step{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 12px;display:flex;gap:8px;align-items:center;color:var(--muted);font-size:12px;font-weight:700}.step b{display:grid;place-items:center;background:#eef1f7;border-radius:50%;width:24px;height:24px;flex-shrink:0}.step.active{border-color:#9eafff;color:var(--blue);background:var(--blue2)}.step.active b{background:var(--blue);color:white}
+.layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.8fr);gap:18px;align-items:start}.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow);margin-bottom:18px}.card h2{font-size:20px;margin:0 0 5px}.sub{color:var(--muted);margin:0 0 18px;font-size:13px}.label{display:block;font-weight:700;font-size:13px;margin:14px 0 6px}input,textarea,select{font:inherit;color:var(--ink);width:100%;border:1px solid #ccd4e3;border-radius:10px;padding:11px 12px;background:#fff}textarea{min-height:84px;resize:vertical}input:focus,textarea:focus,select:focus{outline:3px solid #dce4ff;border-color:var(--blue)}
+button{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:700;cursor:pointer;transition:.15s}button:hover{transform:translateY(-1px)}.primary{background:var(--blue);color:#fff}.secondary{background:#eef1f7;color:#25314b}.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}.danger{background:var(--redbg);color:var(--red)}.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.control{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}.control input[type=range]{padding:0;accent-color:var(--blue)}.value{font-weight:800;color:var(--blue);min-width:36px;text-align:right}.pills{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}.pill{border:1px solid var(--line);background:#f7f8fc;padding:5px 9px;border-radius:99px;font-size:12px;color:#4b5873}.pill.good{background:var(--greenbg);border-color:#b9e7ce;color:var(--green)}.pill.warn{background:var(--amberbg);border-color:#f0d49b;color:var(--amber)}.sectionhead{display:flex;justify-content:space-between;gap:12px;align-items:start}.tiny{font-size:12px;color:var(--muted)}.doclist,.results{display:grid;gap:10px}.doc,.chunk{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}.doc h3,.chunk h3{margin:0 0 4px;font-size:14px}.doc p,.chunk p{margin:0;color:#4f5b73;font-size:13px;white-space:pre-wrap}.docmeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.tag{font-size:11px;padding:3px 7px;background:#f0f2f8;border-radius:6px;color:#59647b}.chunk.selected{border-color:#93a6ff;background:#f7f8ff}.chunk .score{float:right;color:var(--blue);font-size:12px;font-weight:800}.chunk .source{font-size:11px;color:var(--muted);margin-top:8px}.chunk .reason{margin-top:8px;font-size:12px;color:var(--green)}.status{padding:12px 14px;border-radius:10px;background:#f2f5fb;color:#40506d;font-size:13px;margin-top:12px}.status.good{background:var(--greenbg);color:var(--green)}.status.warn{background:var(--amberbg);color:var(--amber)}.status.bad{background:var(--redbg);color:var(--red)}.answer{white-space:pre-wrap;background:#f8f9fd;border:1px solid var(--line);padding:15px;border-radius:12px;min-height:72px}.metricgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.metric{background:#f6f8fc;border-radius:10px;padding:12px}.metric strong{display:block;font-size:20px}.metric span{font-size:11px;color:var(--muted)}.timeline{display:grid;gap:10px}.event{display:grid;grid-template-columns:28px 1fr;gap:10px}.event b{display:grid;place-items:center;width:27px;height:27px;border-radius:8px;background:var(--blue2);color:var(--blue);font-size:12px}.event strong{display:block;font-size:13px}.event p{margin:2px 0 0;color:var(--muted);font-size:12px}.hint{border-left:3px solid var(--blue);padding:10px 12px;background:#f5f7ff;border-radius:0 8px 8px 0;color:#465476;font-size:13px;margin-top:14px}.footer{text-align:center;color:var(--muted);font-size:12px;margin-top:24px}.hidden{display:none!important}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.progress{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:480px){header{padding:24px 18px}.card{padding:16px}.progress{gap:5px}.step{padding:8px 6px;font-size:10px;gap:5px}.step b{width:21px;height:21px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">Interactive learning playground</div>
+  <h1>RAG Lab</h1>
+  <p>Explore the full Retrieval-Augmented Generation pipeline: prepare documents, chunk and embed them, search, rerank, select context, and generate a grounded answer. Everything runs locally in this demo—no API or server required.</p>
+</header>
+<main>
+  <div class="progress" aria-label="RAG pipeline stages">
+    <div class="step active" data-stage="0"><b>1</b>Knowledge base</div>
+    <div class="step" data-stage="1"><b>2</b>Chunk & embed</div>
+    <div class="step" data-stage="2"><b>3</b>Retrieve</div>
+    <div class="step" data-stage="3"><b>4</b>Rerank</div>
+    <div class="step" data-stage="4"><b>5</b>Context</div>
+    <div class="step" data-stage="5"><b>6</b>Generate</div>
+  </div>
+  <div class="layout">
+    <section>
+      <div class="card stagepanel" id="stage0">
+        <h2>1. Knowledge base</h2>
+        <p class="sub">RAG starts with trusted source documents. Load the sample company knowledge base or add your own documents.</p>
+        <label class="label" for="docTitle">Document title</label><input id="docTitle" value="Schedule activation procedure">
+        <label class="label" for="docMeta">Metadata (key: value, comma-separated)</label><input id="docMeta" value="country: Denmark, type: procedure, product: Schedule Planner, version: 2">
+        <label class="label" for="docText">Document text</label><textarea id="docText">Before activating a new shipping schedule, validate the schedule for missing ports, invalid dates, and capacity conflicts. The schedule owner must resolve all validation errors. After validation succeeds, the operations planner reviews the schedule and selects Activate. The system records the activation time and the user's ID.</textarea>
+        <div class="btnrow"><button class="primary" id="addDoc">Add document</button><button class="secondary" id="loadSamples">Reload sample knowledge base</button><button class="ghost" id="clearDocs">Clear all</button></div>
+        <div class="hint">Metadata can help filter results—for example, by country or document type. It improves retrieval only when the metadata is accurate and the query/filter logic uses it.</div>
+        <hr style="border:0;border-top:1px solid var(--line);margin:20px 0">
+        <div class="sectionhead"><h3 style="margin:0">Documents <span class="tiny" id="docCount"></span></h3><span class="tiny">Source of truth</span></div>
+        <div class="doclist" id="documents" style="margin-top:10px"></div>
+      </div>
+
+      <div class="card stagepanel hidden" id="stage1">
+        <h2>2. Chunking & embeddings</h2>
+        <p class="sub">Documents are split into passages. In a production RAG system, an embedding model converts each passage into a vector for semantic search.</p>
+        <label class="label" for="chunkSize">Chunk size (approx. words)</label>
+        <div class="control"><input id="chunkSize" type="range" min="12" max="65" value="28"><span class="value" id="chunkSizeVal">28</span></div>
+        <label class="label" for="overlap">Chunk overlap (words)</label>
+        <div class="control"><input id="overlap" type="range" min="0" max="15" value="5"><span class="value" id="overlapVal">5</span></div>
+        <div class="btnrow"><button class="primary" id="makeChunks">Chunk documents</button></div>
+        <div id="chunkSummary" class="status">Create chunks to continue.</div>
+        <div class="doclist" id="chunks" style="margin-top:12px"></div>
+        <div class="hint"><strong>Learning note:</strong> this offline simulator uses a transparent, lightweight word-feature representation—not a real neural embedding model. It illustrates the pipeline, but its semantic search quality is much lower than a production embedding model.</div>
+      </div>
+
+      <div class="card stagepanel hidden" id="stage2">
+        <h2>3. Retrieve candidate chunks</h2>
+        <p class="sub">The user's query is matched against indexed chunks. Compare keyword, simulated vector, and hybrid retrieval.</p>
+        <label class="label" for="query">User query</label>
+        <textarea id="query">How do I activate a shipping schedule in Denmark?</textarea>
+        <label class="label" for="searchMode">Search strategy</label>
+        <select id="searchMode"><option value="hybrid">Hybrid (keyword + simulated semantic)</option><option value="keyword">Keyword search</option><option value="vector">Simulated vector search</option></select>
+        <label class="label" for="topK">Initial retrieval top-k</label>
+        <div class="control"><input id="topK" type="range" min="1" max="10" value="5"><span class="value" id="topKVal">5</span></div>
+        <label class="label" for="countryFilter">Metadata filter (optional)</label>
+        <select id="countryFilter"><option value="">No country filter</option><option value="Denmark">Country = Denmark</option><option value="Germany">Country = Germany</option><option value="Global">Country = Global</option></select>
+        <div class="btnrow"><button class="primary" id="runSearch">Run retrieval</button><button class="secondary" id="queryMissing">Try an unanswerable query</button></div>
+        <div id="retrievalStatus" class="status">Run retrieval to see candidate chunks.</div>
+        <div class="metricgrid" style="margin-top:12px"><div class="metric"><strong id="metricCandidates">—</strong><span>Candidates found</span></div><div class="metric"><strong id="metricExact">—</strong><span>Keyword overlap</span></div><div class="metric"><strong id="metricFilter">Off</strong><span>Metadata filter</span></div></div>
+        <div class="results" id="retrieved" style="margin-top:12px"></div>
+      </div>
+
+      <div class="card stagepanel hidden" id="stage3">
+        <h2>4. Rerank candidates</h2>
+        <p class="sub">A reranker scores the retrieved candidates against the query, then sorts them. It cannot recover a relevant chunk that initial retrieval never found.</p>
+        <label class="label" for="rerankOn">Reranking</label>
+        <select id="rerankOn"><option value="on">On — rerank candidates</option><option value="off">Off — keep retrieval order</option></select>
+        <div class="btnrow"><button class="primary" id="runRerank">Apply reranking</button></div>
+        <div id="rerankStatus" class="status">Run retrieval first, then rerank.</div>
+        <div class="results" id="reranked" style="margin-top:12px"></div>
+        <div class="hint">In real systems, a cross-encoder can read the query and each candidate passage together. This simulator uses a simple scoring heuristic so you can inspect how ranking changes.</div>
+      </div>
+
+      <div class="card stagepanel hidden" id="stage4">
+        <h2>5. Select context for the LLM</h2>
+        <p class="sub">Choose how many of the best-ranked chunks should be passed to the model. More context can help—but can also add noise, cost, and contradictions.</p>
+        <label class="label" for="finalK">Final context chunks</label>
+        <div class="control"><input id="finalK" type="range" min="1" max="8" value="3"><span class="value" id="finalKVal">3</span></div>
+        <div class="btnrow"><button class="primary" id="selectContext">Select context</button></div>
+        <div id="contextStatus" class="status">Select chunks after retrieval/reranking.</div>
+        <div class="results" id="contextChunks" style="margin-top:12px"></div>
+        <div class="hint">In production, context selection also considers token limits, diversity, source trust, recency, and whether multiple chunks are needed to answer the whole question.</div>
+      </div>
+
+      <div class="card stagepanel hidden" id="stage5">
+        <h2>6. Generate an answer</h2>
+        <p class="sub">The LLM receives the query plus retrieved context. This demo uses a simple extractive rule-based answer—not a live LLM—so the behavior is inspectable and repeatable.</p>
+        <label class="label" for="grounding">Answer policy</label>
+        <select id="grounding"><option value="strict">Strict grounding — say when evidence is insufficient</option><option value="loose">Loose policy — attempt an answer even with weak evidence</option></select>
+        <div class="btnrow"><button class="primary" id="generate">Generate answer</button><button class="secondary" id="reset">Reset simulator</button></div>
+        <div id="answerStatus" class="status">Select context before generating.</div>
+        <label class="label">Simulated answer</label><div class="answer" id="answer">Your answer will appear here.</div>
+        <div class="metricgrid" style="margin-top:12px"><div class="metric"><strong id="answerEvidence">—</strong><span>Evidence chunks</span></div><div class="metric"><strong id="answerConfidence">—</strong><span>Evidence signal*</span></div><div class="metric"><strong id="answerTokens">—</strong><span>Approx. context words</span></div></div>
+        <p class="tiny">*Evidence signal is a teaching heuristic, not calibrated model confidence or a quality guarantee.</p>
+        <div class="hint"><strong>Remember:</strong> RAG does not guarantee truth. Incorrect answers can result from bad source data, retrieval misses, incomplete context, poor ranking, or the model misusing good evidence.</div>
+      </div>
+    </section>
+
+    <aside>
+      <div class="card">
+        <h2>Pipeline map</h2><p class="sub">Your current progress and the job of each stage.</p>
+        <div class="timeline">
+          <div class="event"><b>1</b><div><strong>Index the knowledge</strong><p>Store trusted documents and useful metadata.</p></div></div>
+          <div class="event"><b>2</b><div><strong>Chunk & embed</strong><p>Make passages searchable; keep source text.</p></div></div>
+          <div class="event"><b>3</b><div><strong>Retrieve</strong><p>Find candidate passages using query relevance.</p></div></div>
+          <div class="event"><b>4</b><div><strong>Rerank</strong><p>Improve ordering among candidates already found.</p></div></div>
+          <div class="event"><b>5</b><div><strong>Select context</strong><p>Pass a useful, bounded set of evidence onward.</p></div></div>
+          <div class="event"><b>6</b><div><strong>Generate</strong><p>Answer from context; abstain if evidence is missing.</p></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Experiment notebook</h2><p class="sub">Use this checklist when the answer is wrong.</p>
+        <div id="checklist">
+          <label style="display:flex;gap:9px;align-items:start;margin:12px 0"><input type="checkbox" style="width:auto;margin-top:4px"> Is the source document correct and up to date?</label>
+          <label style="display:flex;gap:9px;align-items:start;margin:12px 0"><input type="checkbox" style="width:auto;margin-top:4px"> Did chunking split related facts apart?</label>
+          <label style="display:flex;gap:9px;align-items:start;margin:12px 0"><input type="checkbox" style="width:auto;margin-top:4px"> Did retrieval find the relevant chunk?</label>
+          <label style="display:flex;gap:9px;align-items:start;margin:12px 0"><input type="checkbox" style="width:auto;margin-top:4px"> Are metadata filters too broad or too restrictive?</label>
+          <label style="display:flex;gap:9px;align-items:start;margin:12px 0"><input type="checkbox" style="width:auto;margin-top:4px"> Did reranking push useful evidence down?</label>
+          <label style="display:flex;gap:9px;align-items:start;margin:12px 0"><input type="checkbox" style="width:auto;margin-top:4px"> Does the final context contain enough evidence?</label>
+          <label style="display:flex;gap:9px;align-items:start;margin:12px 0"><input type="checkbox" style="width:auto;margin-top:4px"> Did the answer make unsupported claims?</label>
+        </div>
+        <button class="ghost" id="clearChecks">Clear checklist</button>
+      </div>
+      <div class="card">
+        <h2>Try these experiments</h2>
+        <div class="btnrow" style="margin-top:8px"><button class="ghost experiment" data-experiment="topk">Increase top-k</button><button class="ghost experiment" data-experiment="filter">Add a metadata filter</button><button class="ghost experiment" data-experiment="missing">Ask for missing info</button><button class="ghost experiment" data-experiment="chunk">Use smaller chunks</button></div>
+        <p class="tiny" id="experimentNote" style="margin-top:12px">Change one variable at a time, then compare the results.</p>
+      </div>
+    </aside>
+  </div>
+  <div class="footer">RAG Lab • Single-file educational demo • No data leaves this browser • Search and generation are simulated, not production AI</div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+let docs=[], chunks=[], retrieved=[], ranked=[], context=[], stage=0, docSeq=0;
+const samples=[
+ {title:"Schedule activation procedure",meta:{country:"Denmark",type:"procedure",product:"Schedule Planner",version:"2"},text:"Before activating a new shipping schedule, validate the schedule for missing ports, invalid dates, and capacity conflicts. The schedule owner must resolve all validation errors. After validation succeeds, the operations planner reviews the schedule and selects Activate. The system records the activation time and the user's ID."},
+ {title:"Schedule editing guide",meta:{country:"Denmark",type:"guide",product:"Schedule Planner",version:"3"},text:"To edit a draft schedule, open Schedule Planner and choose the schedule. Update ports, dates, or capacity, then save the draft. Editing an active schedule may require a new version and an additional review. Saving changes does not activate a schedule."},
+ {title:"Germany schedule operations policy",meta:{country:"Germany",type:"policy",product:"Schedule Planner",version:"1"},text:"In Germany, the regional operations lead must approve a schedule before activation. The schedule must pass validation and comply with local port requirements. Contact the regional lead if approval is pending."},
+ {title:"Troubleshooting validation errors",meta:{country:"Global",type:"troubleshooting",product:"Schedule Planner",version:"4"},text:"If validation fails, review the error list for missing ports, invalid dates, and capacity conflicts. Correct each listed issue and run validation again. Activation remains unavailable until all blocking errors are resolved."},
+ {title:"Forecasting model policy",meta:{country:"Global",type:"policy",product:"Forecasting",version:"1"},text:"Forecasts should include the model version, data timestamp, and known limitations. This document does not define a policy for AI-generated shipping forecasts or prescribe an approval process for them."}
+];
+function cloneSamples(){docs=samples.map((d,i)=>({...d,id:++docSeq}));chunks=[];retrieved=[];ranked=[];context=[];renderDocs();renderChunks();renderResults();setStage(0)}
+function parseMeta(s){const out={};s.split(",").forEach(part=>{let i=part.indexOf(":");if(i>0)out[part.slice(0,i).trim().toLowerCase()]=part.slice(i+1).trim()});return out}
+function renderDocs(){$("docCount").textContent=`(${docs.length})`;$("documents").innerHTML=docs.length?docs.map(d=>`<div class="doc"><h3>${esc(d.title)}</h3><p>${esc(d.text)}</p><div class="docmeta">${Object.entries(d.meta).map(([k,v])=>`<span class="tag">${esc(k)}: ${esc(v)}</span>`).join("")}</div><div class="btnrow"><button class="ghost" data-remove="${d.id}">Remove</button></div></div>`).join(""):'<div class="status warn">No documents. Add one or reload the sample knowledge base.</div>'}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function words(s){return (s.toLowerCase().match(/[a-z0-9]+(?:'[a-z]+)?/g)||[])}
+const stop=new Set("the a an and or but to of in on for with from by is are be it this that how do i what where when who why can should does must our your their".split(" "));
+function terms(s){return words(s).filter(w=>!stop.has(w))}
+function makeChunks(){
+ const size=+$("chunkSize").value, overlap=Math.min(+$("overlap").value,size-1);chunks=[];
+ docs.forEach(d=>{let w=d.text.split(/\s+/).filter(Boolean);let start=0,index=0;while(start<w.length){let part=w.slice(start,start+size).join(" ");chunks.push({id:`D${d.id}-C${++index}`,docId:d.id,title:d.title,meta:d.meta,text:part,terms:terms(part),vec:null});if(start+size>=w.length)break;start+=size-overlap;}});
+ chunks.forEach(c=>c.vec=vector(c.terms));retrieved=[];ranked=[];context=[];renderChunks();$("chunkSummary").className="status good";$("chunkSummary").textContent=`Created ${chunks.length} chunks from ${docs.length} document(s). Chunking is a trade-off: too small can lose context; too large can add noise.`;setStage(1);
+}
+function vector(ts){const v={};ts.forEach(t=>v[t]=(v[t]||0)+1);let norm=Math.sqrt(Object.values(v).reduce((a,b)=>a+b*b,0))||1;Object.keys(v).forEach(k=>v[k]/=norm);return v}
+function cosine(a,b){let sum=0;Object.keys(a).forEach(k=>{if(b[k])sum+=a[k]*b[k]});return sum}
+function renderChunks(){$("chunks").innerHTML=chunks.length?chunks.map(c=>`<div class="chunk"><h3>${esc(c.id)} · ${esc(c.title)}</h3><p>${esc(c.text)}</p><div class="source">${Object.entries(c.meta).map(([k,v])=>`${esc(k)}=${esc(v)}`).join(" · ")}</div></div>`).join(""):'<div class="status">No chunks yet. Click “Chunk documents”.</div>'}
+function scoreChunk(c,q,mode){
+ const qt=terms(q), qset=new Set(qt), ct=new Set(c.terms);let overlap=qt.filter(t=>ct.has(t)).length;let keyword=overlap/(qset.size||1);let sem=cosine(vector(qt),c.vec);let score=mode==="keyword"?keyword:mode==="vector"?sem:(.55*keyword+.45*sem);
+ return {score,keyword,sem,overlap};
+}
+function search(){
+ if(!chunks.length){$("retrievalStatus").className="status warn";$("retrievalStatus").textContent="First create chunks in stage 2.";setStage(1);return}
+ const q=$("query").value.trim(), mode=$("searchMode").value, filter=$("countryFilter").value, k=+$("topK").value;
+ let candidates=chunks.filter(c=>!filter||c.meta.country===filter);
+ let scored=candidates.map(c=>({...c,...scoreChunk(c,q,mode)})).sort((a,b)=>b.score-a.score);
+ retrieved=scored.slice(0,k);ranked=[];context=[];renderRetrieved();
+ $("retrievalStatus").className="status "+(retrieved.length&&retrieved[0].score>.05?"good":"warn");
+ $("retrievalStatus").textContent=retrieved.length?(retrieved[0].score>.05?`Retrieved ${retrieved.length} candidate chunk(s). Inspect whether the top results actually contain the answer.`:`Retrieved ${retrieved.length} weak-match candidate(s). The answer may be missing or the search setup may be poor.`):"No candidates matched the selected metadata filter.";
+ $("metricCandidates").textContent=retrieved.length;$("metricExact").textContent=retrieved.length?Math.round(retrieved[0].keyword*100)+"%":"—";$("metricFilter").textContent=filter||"Off";setStage(2);
+}
+function renderRetrieved(){$("retrieved").innerHTML=retrieved.length?retrieved.map((c,i)=>`<div class="chunk"><span class="score">Score ${c.score.toFixed(3)}</span><h3>#${i+1} · ${esc(c.id)} · ${esc(c.title)}</h3><p>${esc(c.text)}</p><div class="source">Keyword overlap: ${(c.keyword*100).toFixed(0)}% · Simulated vector similarity: ${(c.sem*100).toFixed(0)}% · ${esc(c.meta.country||"No country metadata")}</div></div>`).join(""):'<div class="status warn">No chunks retrieved.</div>'}
+function rerank(){
+ if(!retrieved.length){$("rerankStatus").className="status warn";$("rerankStatus").textContent="Run retrieval first.";setStage(2);return}
+ const q=$("query").value, on=$("rerankOn").value==="on";
+ ranked=retrieved.map(c=>({...c,rerankScore:on?rerankScore(c,q):c.score})).sort((a,b)=>(on?b.rerankScore-a.rerankScore:b.score-a.score));
+ $("rerankStatus").className="status good";$("rerankStatus").textContent=on?"Candidates reordered using a query-plus-passage relevance heuristic. Compare this order with initial retrieval.":"Reranking is off, so candidates remain in initial retrieval order.";
+ $("reranked").innerHTML=ranked.map((c,i)=>`<div class="chunk"><span class="score">${on?"Rerank":"Retrieval"} ${(on?c.rerankScore:c.score).toFixed(3)}</span><h3>#${i+1} · ${esc(c.id)} · ${esc(c.title)}</h3><p>${esc(c.text)}</p><div class="source">Original retrieval score: ${c.score.toFixed(3)}</div></div>`).join("");context=[];setStage(3);
+}
+function rerankScore(c,q){const qt=terms(q), cterms=new Set(c.terms);let overlap=qt.filter(t=>cterms.has(t)).length;let phrase=(c.text.toLowerCase().includes(q.toLowerCase())?.2:0);let title=terms(c.title).filter(t=>qt.includes(t)).length/(qt.length||1);let meta=Object.values(c.meta).join(" ").toLowerCase();let metaHits=qt.filter(t=>meta.includes(t)).length/(qt.length||1);return .62*(overlap/(new Set(qt).size||1))+.2*title+.08*metaHits+phrase+.1*c.sem}
+function selectContext(){if(!ranked.length){$("contextStatus").className="status warn";$("contextStatus").textContent="Run retrieval and reranking first.";setStage(3);return}
+ const k=Math.min(+$("finalK").value,ranked.length);context=ranked.slice(0,k);
+ $("contextStatus").className="status "+(context.some(c=>c.score>.08||c.rerankScore>.08)?"good":"warn");$("contextStatus").textContent=`Selected ${context.length} chunk(s) for context. Check whether they jointly provide enough evidence—not just high scores.`;
+ $("contextChunks").innerHTML=context.map((c,i)=>`<div class="chunk selected"><h3>Context ${i+1} · ${esc(c.id)} · ${esc(c.title)}</h3><p>${esc(c.text)}</p><div class="source">${esc(c.meta.country||"No country metadata")} · ${esc(c.meta.type||"No type metadata")}</div></div>`).join("");setStage(4)}
+function generate(){
+ if(!context.length){$("answerStatus").className="status warn";$("answerStatus").textContent="Select context first.";setStage(4);return}
+ const q=$("query").value.trim(), qterms=terms(q), allText=context.map(c=>c.text).join(" "), evidenceTerms=new Set(terms(allText));let coverage=qterms.filter(t=>evidenceTerms.has(t)).length/(new Set(qterms).size||1);
+ const relevant=context.filter(c=>scoreChunk(c,q,"hybrid").score>.08);
+ const strict=$("grounding").value==="strict";
+ // A lightweight heuristic for whether context contains actionable evidence.
+ const actionWords=["validate","activation","activate","approval","approved","policy","procedure","contact","schedule","forecast","not define","does not"];
+ const hasAction=actionWords.some(w=>allText.toLowerCase().includes(w));
+ let answer="", good=relevant.length>0&&coverage>=.18&&hasAction;
+ if(good){
+   let sentences=allText.match(/[^.!?]+[.!?]+|[^.!?]+$/g)||[allText];
+   let qset=new Set(qterms);
+   let chosen=sentences.map(s=>({s:s.trim(),score:terms(s).filter(t=>qset.has(t)).length})).filter(x=>x.s).sort((a,b)=>b.score-a.score).slice(0,4);
+   answer="Based on the retrieved context:\n\n"+chosen.map(x=>"• "+x.s).join("\n");
+   if(strict)answer+="\n\nNote: This answer is limited to the selected source passages. Verify the cited document/version before acting.";
+ } else if(strict){answer="I can't determine the answer from the selected context. The available passages do not provide sufficiently strong evidence for this query. Try checking the source documents, adjusting the search strategy or metadata filters, retrieving more candidates, or asking a more specific question."}
+ else {answer="The system has weak evidence, but a loose answer policy would still attempt a response. This is risky: the answer may be incomplete or unsupported.\n\nRetrieved text:\n"+(allText.slice(0,500)||"(no text)") }
+ $("answer").textContent=answer;$("answerEvidence").textContent=relevant.length;$("answerConfidence").textContent=Math.round(coverage*100)+"%";$("answerTokens").textContent=words(allText).length;
+ $("answerStatus").className="status "+(good?"good":strict?"warn":"bad");
+ $("answerStatus").textContent=good?"Answer assembled from relevant retrieved context. This simple demo does not validate factual correctness.":strict?"Abstained because the evidence signal was weak. In a real system, abstention should be calibrated and evaluated.":"Generated despite weak evidence. This illustrates why insufficient-context handling matters.";
+ setStage(5)
+}
+function setStage(n){stage=n;document.querySelectorAll(".step").forEach(el=>el.classList.toggle("active",+el.dataset.stage===n));document.querySelectorAll(".stagepanel").forEach((el,i)=>el.classList.toggle("hidden",i!==n))}
+document.querySelectorAll(".step").forEach(el=>el.addEventListener("click",()=>setStage(+el.dataset.stage)));
+$("addDoc").onclick=()=>{let title=$("docTitle").value.trim(),text=$("docText").value.trim();if(!title||!text)return alert("Please enter a document title and text.");docs.push({id:++docSeq,title,meta:parseMeta($("docMeta").value),text});renderDocs();$("docTitle").value="New internal document";$("docText").value="Add the document content here."};
+$("documents").addEventListener("click",e=>{let b=e.target.closest("[data-remove]");if(b){docs=docs.filter(d=>d.id!==+b.dataset.remove);chunks=[];retrieved=[];ranked=[];context=[];renderDocs();renderChunks()}});
+$("loadSamples").onclick=cloneSamples;$("clearDocs").onclick=()=>{docs=[];chunks=[];retrieved=[];ranked=[];context=[];renderDocs();renderChunks()};
+$("chunkSize").oninput=()=>{$("chunkSizeVal").textContent=$("chunkSize").value};$("overlap").oninput=()=>{$("overlapVal").textContent=$("overlap").value};$("topK").oninput=()=>{$("topKVal").textContent=$("topK").value};$("finalK").oninput=()=>{$("finalKVal").textContent=$("finalK").value};
+$("makeChunks").onclick=makeChunks;$("runSearch").onclick=search;$("queryMissing").onclick=()=>{$("query").value="What is our company's policy on AI-generated shipping forecasts?";search()};
+$("runRerank").onclick=rerank;$("selectContext").onclick=selectContext;$("generate").onclick=generate;
+$("reset").onclick=()=>{cloneSamples();$("query").value="How do I activate a shipping schedule in Denmark?";$("searchMode").value="hybrid";$("topK").value=5;$("topKVal").textContent="5";$("finalK").value=3;$("finalKVal").textContent="3";$("countryFilter").value="";$("rerankOn").value="on";$("grounding").value="strict";$("chunkSize").value=28;$("chunkSizeVal").textContent="28";$("overlap").value=5;$("overlapVal").textContent="5";$("answer").textContent="Your answer will appear here.";setStage(0)};
+$("clearChecks").onclick=()=>document.querySelectorAll('#checklist input[type=checkbox]').forEach(c=>c.checked=false);
+document.querySelectorAll(".experiment").forEach(b=>b.onclick=()=>{let note="";if(b.dataset.experiment==="topk"){$("topK").value=10;$("topKVal").textContent="10";note="Top-k set to 10. Run retrieval again and check whether useful evidence appears—or noise increases."}if(b.dataset.experiment==="filter"){$("countryFilter").value="Denmark";note="Country filter set to Denmark. This can remove irrelevant regions, but a wrong filter can hide the answer."}if(b.dataset.experiment==="missing"){$("query").value="What is our company's policy on AI-generated shipping forecasts?";note="Query changed to a question with no defined policy in the sample data. Observe whether strict grounding abstains."}if(b.dataset.experiment==="chunk"){$("chunkSize").value=16;$("chunkSizeVal").textContent="16";note="Chunk size set to 16 words. Re-chunk and compare whether passages retain enough context."}$("experimentNote").textContent=note});
+cloneSamples();$("chunkSizeVal").textContent=$("chunkSize").value;$("overlapVal").textContent=$("overlap").value;
+</script>
+</body>
+</html>
